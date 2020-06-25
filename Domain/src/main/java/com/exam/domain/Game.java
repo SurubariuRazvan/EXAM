@@ -17,12 +17,16 @@ public class Game implements com.exam.domain.Entity<Integer> {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "game")
     private Set<Round> rounds;
 
+    @Column(name = "configuration")
+    private String configuration;
+
     public Game() {
     }
 
-    public Game(Integer id) {
+    public Game(Integer id, String configuration) {
         this.id = id;
         this.rounds = new HashSet<>();
+        this.configuration = configuration;
     }
 
     @Override
@@ -35,6 +39,14 @@ public class Game implements com.exam.domain.Entity<Integer> {
         this.id = id;
     }
 
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
+    }
+
     public Set<Round> getRounds() {
         return rounds;
     }
@@ -43,7 +55,7 @@ public class Game implements com.exam.domain.Entity<Integer> {
         this.rounds = rounds;
     }
 
-    public void addRound(Round round){
+    public void addRound(Round round) {
         this.rounds.add(round);
     }
 }

@@ -1,48 +1,45 @@
 package com.exam.client.controller;
 
-import com.exam.client.Players;
 import com.exam.client.gui.GuiUtility;
 import com.exam.domain.*;
 import com.exam.service.IAppObserver;
 import com.exam.service.IAppServices;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 
 import java.io.Serializable;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GameController extends UnicastRemoteObject implements Initializable, IAppObserver, Serializable {
-    public TableView<Players> scoreTable;
-    public TableColumn<Players, Integer> p1;
-    public TableColumn<Players, Integer> p2;
-    public TableColumn<Players, Integer> p3;
     public Label letterSet;
-    public TextField newWord;
     public Button send;
+    public Label generatedNumber;
+    public StackPane rootPane;
+    public BorderPane menuPane;
+    public Label lastPlayer;
+    public Label lastGN;
     private IAppServices appService;
     private User user;
+    private Random rand;
 
     public GameController() throws RemoteException {
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        p1.setCellValueFactory(new PropertyValueFactory<>("p1Score"));
-        p2.setCellValueFactory(new PropertyValueFactory<>("p2Score"));
-        p3.setCellValueFactory(new PropertyValueFactory<>("p3Score"));
     }
 
     public void setService(IAppServices appService, User user) {
         this.appService = appService;
         this.user = user;
+        this.rand = new Random();
         Platform.runLater(() -> {
             letterSet.setText(appService.getLetterSet());
         });
@@ -66,47 +63,33 @@ public class GameController extends UnicastRemoteObject implements Initializable
     }
 
     @Override
-    public void setScores(Round currentRound) {
-        List<Players> players = new ArrayList<>();
-        Map<Integer, List<Integer>> scores = new TreeMap<>();
-        for (var a : currentRound.getWords())
-            scores.put(a.getStudent().getId(), new ArrayList<>());
-        for (var word : currentRound.getWords())
-            scores.get(word.getStudent().getId()).add(word.getValue());
-        List<Integer> finalScores = new ArrayList<>();
-        for (var id : scores.keySet().stream().sorted().collect(Collectors.toList()))
-            finalScores.add(scores.get(id).stream().mapToInt(Integer::intValue).sum());
-        players.add(new Players(finalScores.get(0), finalScores.get(1), finalScores.get(2)));
+    public void setScores(User user, Integer position) {
         Platform.runLater(() -> {
             letterSet.setText(appService.getLetterSet());
-            scoreTable.setItems(FXCollections.observableList(players));
+            if (user == null)
+                send.setDisable(false);
+            else {
+                lastPlayer.setText(user.getName());
+                lastGN.setText(position.toString());
+            }
         });
     }
 
     @Override
-    public void finishGame(Game game) {
-        List<Players> players = new ArrayList<>();
-        Map<Integer, List<Integer>> scores = new TreeMap<>();
-        for (Round currentRound : game.getRounds()) {
-            for (var a : currentRound.getWords())
-                scores.put(a.getStudent().getId(), new ArrayList<>());
-            break;
-        }
-        for (Round currentRound : game.getRounds())
-            for (var word : currentRound.getWords())
-                scores.get(word.getStudent().getId()).add(word.getValue());
-        List<Integer> finalScores = new ArrayList<>();
-        for (var id : scores.keySet().stream().sorted().collect(Collectors.toList()))
-            finalScores.add(scores.get(id).stream().mapToInt(Integer::intValue).sum());
-        players.add(new Players(finalScores.get(0), finalScores.get(1), finalScores.get(2)));
+    public void finishGame(String winner) {
         Platform.runLater(() -> {
-            scoreTable.setItems(FXCollections.observableList(players));
+            GuiUtility.showError(rootPane, menuPane, "Won the game!!", winner);
+            send.setDisable(true);
         });
-        send.setDisable(true);
     }
 
     public void send(ActionEvent actionEvent) {
-        appService.sendWord(user, newWord.getText());
+        Platform.runLater(() -> {
+            send.setDisable(true);
+        });
+        Integer number = rand.nextInt(4) + 1;
+        generatedNumber.setText(number.toString());
+        appService.sendWord(user, number);
     }
 }
 

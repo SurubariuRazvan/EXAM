@@ -75,13 +75,13 @@ public class StudentController implements Initializable, IUserController {
     }
 
     @Override
-    public void setScores(Round currentRound) {
-        gameController.setScores(currentRound);
+    public void setScores(User user, Integer position) {
+        gameController.setScores(user, position);
     }
 
     @Override
-    public void finishGame(Game game) throws RemoteException {
-        gameController.finishGame(game);
+    public void finishGame(String winner) throws RemoteException {
+        gameController.finishGame(winner);
     }
 
     @Override

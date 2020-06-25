@@ -43,7 +43,7 @@ public class AppServicesImpl implements IAppServices {
         userRepo.save(new Student(null, "ion3", "a", "Ionel3"));
         userRepo.save(new Student(null, "ion4", "a", "Ionel4"));
 
-        LetterSet letterSet = new LetterSet(null, "['a','c','e','r']", null, new HashSet<>());
+        LetterSet letterSet = new LetterSet(null, "__W_____W____", null, new HashSet<>());
         Set<LetterSetValue> letterSetValue = new HashSet<>();
         letterSetValue.add(new LetterSetValue(null, letterSet, 4, "care"));
         letterSetValue.add(new LetterSetValue(null, letterSet, 6, "acre"));
@@ -54,7 +54,7 @@ public class AppServicesImpl implements IAppServices {
         letterSet.setLetterSetValue(letterSetValue);
         wordRepository.save(letterSet);
 
-        LetterSet letterSet1 = new LetterSet(null, "['a','b','c','r']", null, new HashSet<>());
+        LetterSet letterSet1 = new LetterSet(null, "____W___W__W_", null, new HashSet<>());
         Set<LetterSetValue> letterSetValue1 = new HashSet<>();
         letterSetValue1.add(new LetterSetValue(null, letterSet1, 4, "bac"));
         letterSetValue1.add(new LetterSetValue(null, letterSet1, 6, "rac"));
@@ -76,7 +76,7 @@ public class AppServicesImpl implements IAppServices {
 
     @Override
     public String getLetterSet() {
-        return currentLetterSet.getLetter_Set();
+        return currentLetterSet.getLetter_Set().substring(1);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class AppServicesImpl implements IAppServices {
     @Override
     public void notifyStartGame() {
         setNewLetterSet();
-        game = new Game(null);
+        game = new Game(null, currentLetterSet.getLetter_Set());
         currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
         roundNumber = 0;
         for (var user : loggedUsers.values()) {
@@ -124,7 +124,6 @@ public class AppServicesImpl implements IAppServices {
     }
 
     public void handleRound() {
-        setNewLetterSet();
         sendScores(currentRound);
         currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
     }
@@ -132,7 +131,7 @@ public class AppServicesImpl implements IAppServices {
     private void sendScores(Round currentRound) {
         for (var user : loggedUsers.values()) {
             try {
-                user.getObserver().setScores(currentRound);
+                user.getObserver().setScores(null, 0);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -140,18 +139,58 @@ public class AppServicesImpl implements IAppServices {
     }
 
     @Override
-    public void sendWord(User user, String text) {
-        String strippedLetterSet = currentLetterSet.getLetter_Set().replace("[", "").replace(",", "").replace("]", "").replace("'", "");
-        LetterSetValue found = null;
-        for (var a : currentLetterSet.getLetterSetValue())
-            if (a.getWord().equals(text))
-                found = a;
-        if (found == null)
-            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, 0));
-        else if (found.getWord().length() == strippedLetterSet.length())
-            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, found.getValue()));
-        else
-            currentRound.getWords().add(new Word(null, (Student) user, currentRound, text, found.getValue() - strippedLetterSet.length() + text.length()));
+    public void sendWord(User user, Integer position) {
+        char userID = user.getId().toString().charAt(0);
+        String configuration = currentLetterSet.getLetter_Set();
+        Integer oldPosition = configuration.indexOf(userID);
+        if (oldPosition == -1)
+            oldPosition++;
+        char[] confArray = configuration.toCharArray();
+        if (confArray[oldPosition + position] == '_') {
+            confArray[oldPosition + position] = userID;
+            confArray[oldPosition] = '_';
+        } else {
+            boolean chosen = false;
+            int currentPosition = position + oldPosition;
+            if (confArray[currentPosition] == 'W') {
+                confArray[oldPosition] = '_';
+                while (!chosen) {
+                    if (confArray[currentPosition] == '_') {
+                        confArray[currentPosition] = userID;
+                        chosen = true;
+                    }
+                    currentPosition--;
+                    if (currentPosition == 0)
+                        chosen = true;
+                }
+            } else {
+                if (confArray[currentPosition] != 'W' && confArray[currentPosition] != '_') {
+                    char oldID = userID;
+                    userID = confArray[currentPosition];
+                    confArray[currentPosition] = oldID;
+                    confArray[oldPosition] = '_';
+                    while (!chosen) {
+                        if (confArray[currentPosition] == '_') {
+                            confArray[currentPosition] = userID;
+                            chosen = true;
+                        }
+                        currentPosition--;
+                        if (currentPosition == 0)
+                            chosen = true;
+                    }
+                }
+            }
+        }
+        configuration = String.valueOf(confArray);
+        currentLetterSet.setLetter_Set(configuration);
+        currentRound.getWords().add(new Word(null, (Student) user, currentRound, configuration, position));
+        for (var userr : loggedUsers.values()) {
+            try {
+                userr.getObserver().setScores(user, position);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
         if (currentRound.getWords().size() == 3) {
             game.addRound(currentRound);
             handleRound();
@@ -163,9 +202,16 @@ public class AppServicesImpl implements IAppServices {
 
     private void gameFinished() {
         gameRepository.save(game);
+        char[] arr = currentLetterSet.getLetter_Set().toCharArray();
+        int winner = 1;
+        for (int i = arr.length - 1; i > 0; i--)
+            if (arr[i] != '_' && arr[i] != 'W') {
+                winner = arr[i] - '0';
+                break;
+            }
         for (var user : loggedUsers.values()) {
             try {
-                user.getObserver().finishGame(game);
+                user.getObserver().finishGame(userRepo.findByID(winner).getName());
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

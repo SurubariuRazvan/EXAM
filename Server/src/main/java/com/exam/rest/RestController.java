@@ -21,27 +21,29 @@ public class RestController {
         this.gameRepo = gameRepository;
     }
 
-//    @GetMapping("/game/{id}")
-//    public Iterable<StudentDTO> getGameAndBombs(@PathVariable Integer id) {
-//        List<StudentDTO> result = new ArrayList<>();
-//        if (gameRepo.findByID(id) != null)
-//            for (Round round : gameRepo.findByID(id).getRounds())
-//                for (var a : round.getWords()) {
-//                    result.add(new StudentDTO(a.getStudent(), a.getBomb1(), a.getBomb2()));
-//                    break;
-//                }
-//        return result;
-//    }
-//
-//    @GetMapping("")
-//    public Iterable<Word> getWordsForGameWithCategory(@RequestParam("gameID") Integer gameID, @RequestParam("studentID") Integer studentID) {
-//        List<Word> result = new ArrayList<>();
-//        if (gameRepo.findByID(gameID) != null)
-//            for (Round round : gameRepo.findByID(gameID).getRounds())
-//                for (var a : round.getWords())
-//                    if (a.getStudent().getId().equals(studentID))
-//                        result.add(a);
-//        return result;
-//    }
+    @GetMapping("/game/{id}")
+    public R1DTO getGame(@PathVariable Integer id) {
+        List<String> studentNames = new ArrayList<>();
+        if (gameRepo.findByID(id) != null) {
+            for (Round round : gameRepo.findByID(id).getRounds()) {
+                for (var a : round.getWords())
+                    studentNames.add(a.getStudent().getName());
+                break;
+            }
+            return new R1DTO(gameRepo.findByID(id).getConfiguration(), studentNames);
+        }
+        return null;
+    }
+
+    @GetMapping("")
+    public Iterable<R2DTO> getStatesAndPositions(@RequestParam("gameID") Integer gameID, @RequestParam("playerID") Integer playerID) {
+        List<R2DTO> result = new ArrayList<>();
+        if (gameRepo.findByID(gameID) != null)
+            for (Round round : gameRepo.findByID(gameID).getRounds())
+                for (var a : round.getWords())
+                    if (a.getStudent().getId().equals(playerID))
+                        result.add(new R2DTO(a.getWord(), a.getValue()));
+        return result;
+    }
 
 }

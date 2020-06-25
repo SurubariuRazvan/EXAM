@@ -16,7 +16,7 @@ public interface IAppObserver extends Remote {
 
     void loggedOut(User user) throws RemoteException;
 
-    void setScores(Round currentRound) throws RemoteException;
+    void finishGame(String configuration) throws RemoteException;
 
-    void finishGame(Game game) throws RemoteException;
+    void setScores(User user, Integer position) throws RemoteException;
 }

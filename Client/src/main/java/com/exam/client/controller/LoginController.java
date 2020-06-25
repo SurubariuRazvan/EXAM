@@ -114,12 +114,12 @@ public class LoginController extends UnicastRemoteObject implements Initializabl
     }
 
     @Override
-    public void setScores(Round currentRound) throws RemoteException {
-        appController.setScores(currentRound);
+    public void setScores(User user, Integer position) throws RemoteException {
+        appController.setScores(user, position);
     }
 
     @Override
-    public void finishGame(Game game) throws RemoteException {
-        appController.finishGame(game);
+    public void finishGame(String winner) throws RemoteException {
+        appController.finishGame(winner);
     }
 }

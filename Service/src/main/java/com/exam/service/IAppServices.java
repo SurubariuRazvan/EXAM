@@ -13,7 +13,7 @@ public interface IAppServices {
 
     void playerCountChanged(Integer id);
 
-    void sendWord(User user, String text);
+    void sendWord(User user, Integer text);
 
     String getLetterSet();
 }
