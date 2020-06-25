@@ -43,23 +43,10 @@ public class AppServicesImpl implements IAppServices {
         userRepo.save(new Student(null, "ion3", "a", "Ionel3"));
         userRepo.save(new Student(null, "ion4", "a", "Ionel4"));
 
-        LetterSet letterSet = new LetterSet(null, "__W_____W____", null, new HashSet<>());
-        Set<LetterSetValue> letterSetValue = new HashSet<>();
-        letterSetValue.add(new LetterSetValue(null, letterSet, 4, "care"));
-        letterSetValue.add(new LetterSetValue(null, letterSet, 6, "acre"));
-        letterSetValue.add(new LetterSetValue(null, letterSet, 7, "arce"));
-        letterSetValue.add(new LetterSetValue(null, letterSet, 3, "cer"));
-        letterSetValue.add(new LetterSetValue(null, letterSet, 4, "arc"));
-        letterSetValue.add(new LetterSetValue(null, letterSet, 3, "car"));
-        letterSet.setLetterSetValue(letterSetValue);
+        LetterSet letterSet = new LetterSet(null, "__W_____W____", new HashSet<>());
         wordRepository.save(letterSet);
 
-        LetterSet letterSet1 = new LetterSet(null, "____W___W__W_", null, new HashSet<>());
-        Set<LetterSetValue> letterSetValue1 = new HashSet<>();
-        letterSetValue1.add(new LetterSetValue(null, letterSet1, 4, "bac"));
-        letterSetValue1.add(new LetterSetValue(null, letterSet1, 6, "rac"));
-        letterSetValue1.add(new LetterSetValue(null, letterSet1, 7, "crab"));
-        letterSet1.setLetterSetValue(letterSetValue1);
+        LetterSet letterSet1 = new LetterSet(null, "____W___W__W_", new HashSet<>());
         wordRepository.save(letterSet1);
     }
 
@@ -76,7 +63,7 @@ public class AppServicesImpl implements IAppServices {
 
     @Override
     public String getLetterSet() {
-        return currentLetterSet.getLetter_Set().substring(1);
+        return currentLetterSet.getConfiguration().substring(1);
     }
 
     @Override
@@ -111,7 +98,7 @@ public class AppServicesImpl implements IAppServices {
     @Override
     public void notifyStartGame() {
         setNewLetterSet();
-        game = new Game(null, currentLetterSet.getLetter_Set());
+        game = new Game(null, currentLetterSet.getConfiguration());
         currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
         roundNumber = 0;
         for (var user : loggedUsers.values()) {
@@ -124,11 +111,6 @@ public class AppServicesImpl implements IAppServices {
     }
 
     public void handleRound() {
-        sendScores(currentRound);
-        currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
-    }
-
-    private void sendScores(Round currentRound) {
         for (var user : loggedUsers.values()) {
             try {
                 user.getObserver().setScores(null, 0);
@@ -136,12 +118,14 @@ public class AppServicesImpl implements IAppServices {
                 e.printStackTrace();
             }
         }
+        currentRound = new Round(null, game, new HashSet<>(), currentLetterSet);
     }
+
 
     @Override
     public void sendWord(User user, Integer position) {
         char userID = user.getId().toString().charAt(0);
-        String configuration = currentLetterSet.getLetter_Set();
+        String configuration = currentLetterSet.getConfiguration();
         Integer oldPosition = configuration.indexOf(userID);
         if (oldPosition == -1)
             oldPosition++;
@@ -182,7 +166,7 @@ public class AppServicesImpl implements IAppServices {
             }
         }
         configuration = String.valueOf(confArray);
-        currentLetterSet.setLetter_Set(configuration);
+        currentLetterSet.setConfiguration(configuration);
         currentRound.getWords().add(new Word(null, (Student) user, currentRound, configuration, position));
         for (var userr : loggedUsers.values()) {
             try {
@@ -202,7 +186,7 @@ public class AppServicesImpl implements IAppServices {
 
     private void gameFinished() {
         gameRepository.save(game);
-        char[] arr = currentLetterSet.getLetter_Set().toCharArray();
+        char[] arr = currentLetterSet.getConfiguration().toCharArray();
         int winner = 1;
         for (int i = arr.length - 1; i > 0; i--)
             if (arr[i] != '_' && arr[i] != 'W') {

@@ -30,7 +30,7 @@ public class RestController {
                     studentNames.add(a.getStudent().getName());
                 break;
             }
-            return new R1DTO(gameRepo.findByID(id).getConfiguration(), studentNames);
+            return new R1DTO(gameRepo.findByID(id).getConfiguration().substring(1), studentNames);
         }
         return null;
     }
@@ -42,7 +42,7 @@ public class RestController {
             for (Round round : gameRepo.findByID(gameID).getRounds())
                 for (var a : round.getWords())
                     if (a.getStudent().getId().equals(playerID))
-                        result.add(new R2DTO(a.getWord(), a.getValue()));
+                        result.add(new R2DTO(a.getConfiguration().substring(1), a.getGeneratedNumber()));
         return result;
     }
 

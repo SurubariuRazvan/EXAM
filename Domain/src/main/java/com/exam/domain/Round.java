@@ -20,17 +20,17 @@ public class Round implements com.exam.domain.Entity<Integer> {
     private Set<Word> words;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "letter_set_id")
-    private LetterSet letterSet;
+    @JoinColumn(name = "configuration_id")
+    private LetterSet configuration;
 
     public Round() {
     }
 
-    public Round(Integer id, Game game, Set<Word> words, LetterSet letterSet) {
+    public Round(Integer id, Game game, Set<Word> words, LetterSet configuration) {
         this.id = id;
         this.game = game;
         this.words = words;
-        this.letterSet = letterSet;
+        this.configuration = configuration;
     }
 
     @Override
@@ -59,11 +59,11 @@ public class Round implements com.exam.domain.Entity<Integer> {
         this.words = words;
     }
 
-    public LetterSet getLetterSet() {
-        return letterSet;
+    public LetterSet getConfiguration() {
+        return configuration;
     }
 
-    public void setLetterSet(LetterSet letterSet) {
-        this.letterSet = letterSet;
+    public void setConfiguration(LetterSet configuration) {
+        this.configuration = configuration;
     }
 }

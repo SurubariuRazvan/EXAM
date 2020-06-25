@@ -19,21 +19,21 @@ public class Word implements com.exam.domain.Entity<Integer> {
     @JoinColumn(name = "round_id")
     private Round round;
 
-    @Column(name = "word")
-    private String word;
+    @Column(name = "configuration")
+    private String configuration;
 
-    @Column(name = "value")
-    private Integer value;
+    @Column(name = "generated_number")
+    private Integer generatedNumber;
 
     public Word() {
     }
 
-    public Word(Integer id, Student student, Round round, String word, Integer value) {
+    public Word(Integer id, Student student, Round round, String configuration, Integer generatedNumber) {
         this.id = id;
         this.student = student;
         this.round = round;
-        this.word = word;
-        this.value = value;
+        this.configuration = configuration;
+        this.generatedNumber = generatedNumber;
     }
 
     @Override
@@ -62,19 +62,19 @@ public class Word implements com.exam.domain.Entity<Integer> {
         this.round = round;
     }
 
-    public String getWord() {
-        return word;
+    public String getConfiguration() {
+        return configuration;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 
-    public Integer getValue() {
-        return value;
+    public Integer getGeneratedNumber() {
+        return generatedNumber;
     }
 
-    public void setValue(Integer value) {
-        this.value = value;
+    public void setGeneratedNumber(Integer generatedNumber) {
+        this.generatedNumber = generatedNumber;
     }
 }

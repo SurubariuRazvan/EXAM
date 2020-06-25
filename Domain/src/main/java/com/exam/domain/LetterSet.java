@@ -11,22 +11,18 @@ public class LetterSet implements Entity<Integer> {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "letter_set")
-    private String letter_Set;
+    @Column(name = "configuration")
+    private String configuration;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "letter_set")
-    private Set<LetterSetValue> letterSetValue;
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "letterSet")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "configuration")
     private Set<Round> round;
 
     public LetterSet() {
     }
 
-    public LetterSet(Integer id, String letter_Set, Set<LetterSetValue> letterSetValue, Set<Round> round) {
+    public LetterSet(Integer id, String configuration, Set<Round> round) {
         this.id = id;
-        this.letter_Set = letter_Set;
-        this.letterSetValue = letterSetValue;
+        this.configuration = configuration;
         this.round = round;
     }
 
@@ -40,20 +36,12 @@ public class LetterSet implements Entity<Integer> {
         this.id = id;
     }
 
-    public String getLetter_Set() {
-        return letter_Set;
+    public String getConfiguration() {
+        return configuration;
     }
 
-    public void setLetter_Set(String letter_Set) {
-        this.letter_Set = letter_Set;
-    }
-
-    public Set<LetterSetValue> getLetterSetValue() {
-        return letterSetValue;
-    }
-
-    public void setLetterSetValue(Set<LetterSetValue> letterSetValue) {
-        this.letterSetValue = letterSetValue;
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 
     public Set<Round> getRound() {
